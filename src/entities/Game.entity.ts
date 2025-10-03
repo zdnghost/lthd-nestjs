@@ -1,0 +1,20 @@
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Offer } from './Offer.entity.js';
+
+@Entity()
+export class Game {
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
+  
+    @Column({ type: 'varchar', length: 255 })
+    name: string;
+  
+    @Column({ type: 'text', nullable: true })
+    description?: string;
+  
+    @Column({ type: 'simple-array' })
+    platforms: string[];  
+  
+    @OneToMany(() => Offer, (offer) => offer.game, { cascade: true, eager: true })
+    offers: Offer[];
+}

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { callGeminiApi } from './utils/gemini';
+import { callGeminiApi } from './utils/gemini.js';
 import * as dotenv from 'dotenv';
 dotenv.config();
 @Injectable()
