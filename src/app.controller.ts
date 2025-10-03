@@ -10,4 +10,8 @@ export class AppController {
   async getGeminiResponse() {
     return this.appService.askGemini();
   }
+
+  getHello(): string {
+    return 'Hello World!';
+  }
 }
