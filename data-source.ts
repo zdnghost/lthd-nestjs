@@ -1,7 +1,7 @@
 // data-source.ts
 import { DataSource } from 'typeorm';
 import 'dotenv/config';
-import { fileURLToPath, pathToFileURL } from 'url';
+import { fileURLToPath, } from 'url';
 import path from 'path';
 
 const __filename = fileURLToPath(import.meta.url);

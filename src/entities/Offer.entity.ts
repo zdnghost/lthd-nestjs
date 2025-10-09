@@ -1,12 +1,12 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Game } from './Game.entity.js';
+import type { Game } from './Game.entity.js';
 
 @Entity('offers')
 export class Offer {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Game, (game) => game.offers, { onDelete: 'CASCADE' })
+  @ManyToOne('Game', 'offers', { onDelete: 'CASCADE' })
   game: Game;
 
   @Column({ type: 'varchar', length: 150 })

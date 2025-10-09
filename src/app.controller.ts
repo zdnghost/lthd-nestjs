@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get ,Render} from '@nestjs/common';
 import { AppService } from './app.service.js';
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -13,5 +13,13 @@ export class AppController {
 
   getHello(): string {
     return 'Hello World!';
+  }
+  @Get()
+  @Render('index') // Tự động render views/index.hbs
+  getHome() {
+    return {
+      title: 'Trang chủ',
+      name: 'Tuấn', // biến truyền vào view
+    };
   }
 }
