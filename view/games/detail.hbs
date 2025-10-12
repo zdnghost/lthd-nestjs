@@ -1,0 +1,39 @@
+{{#> main title=game.name}}
+<div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-6">
+  <h1 class="text-3xl font-bold text-gray-800 mb-4">{{game.name}}</h1>
+
+  <p class="mb-2"><b>Mô tả:</b> {{game.description}}</p>
+  <p class="mb-4"><b>Nền tảng:</b> {{game.platforms}}</p>
+
+  <h2 class="text-2xl font-semibold mb-4">Offers</h2>
+
+  <!-- Form thêm offer -->
+  <form method="post" action="/games/{{game.id}}/offers" class="mb-6 grid grid-cols-1 md:grid-cols-5 gap-3">
+    <input name="sellerName" placeholder="Seller" required class="border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400"/>
+    <input name="price" placeholder="Giá" required class="border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400"/>
+    <input name="currency" value="USD" class="border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400"/>
+    <input name="platform" placeholder="Platform" class="border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400"/>
+    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Thêm Offer</button>
+  </form>
+
+  <!-- List offers -->
+  <ul class="list-disc pl-5 space-y-2">
+    {{#each game.offers}}
+    <li class="flex items-center justify-between bg-gray-50 p-2 rounded hover:bg-gray-100">
+      <div>
+        💰 {{this.sellerName}} - {{this.price}} {{this.currency}}
+        (<span>{{#if this.platform}}{{this.platform}}{{else}}All{{/if}}</span>)
+        <a href="{{this.url}}" target="_blank" class="text-blue-600 hover:underline ml-2">Link</a>
+      </div>
+      <form method="post" action="/offers/{{this.id}}/delete" class="inline">
+        <button type="submit" onclick="return confirm('Xóa offer này?')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
+          Xóa
+        </button>
+      </form>
+    </li>
+    {{/each}}
+  </ul>
+
+  <a href="/games" class="inline-block mt-6 text-blue-600 hover:underline">⬅ Trở lại danh sách</a>
+</div>
+{{/main}}

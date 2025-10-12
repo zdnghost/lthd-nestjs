@@ -7,13 +7,13 @@ import hbs from 'hbs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const viewPath = join(__dirname, '..', '..', 'view');
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  
+  const viewPath = join(__dirname, '..', '..', 'view');
   app.set('views', viewPath);
   app.set('view engine', 'hbs');
   hbs.registerPartials(join(viewPath, 'partials'));
+  app.set('view options', { layout: 'layouts/main' });
 
   await app.listen(process.env.PORT ?? 3000);
   console.log(`🚀 Server chạy tại: http://localhost:${process.env.PORT ?? 3000}`);
