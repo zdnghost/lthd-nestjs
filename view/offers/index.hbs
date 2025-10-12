@@ -1,0 +1,36 @@
+{{#> layouts/main title="Danh sách Offer"}}
+  {{#*inline "body"}}
+    <h1>💰 Tất cả Offers</h1>
+
+    <table border="1" cellpadding="6">
+      <thead>
+        <tr>
+          <th>Seller</th>
+          <th>Giá</th>
+          <th>Game</th>
+          <th>Platform</th>
+          <th>Stock</th>
+          <th>URL</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each offers}}
+        <tr>
+          <td>{{this.sellerName}}</td>
+          <td>{{this.price}} {{this.currency}}</td>
+          <td>{{this.game.name}}</td>
+          <td>{{this.platform}}</td>
+          <td>{{this.stock}}</td>
+          <td><a href="{{this.url}}" target="_blank">Link</a></td>
+          <td>
+            <form method="post" action="/offers/{{this.id}}/delete" style="display:inline;">
+              <button type="submit">Xóa</button>
+            </form>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  {{/inline}}
+{{/layouts/main}}

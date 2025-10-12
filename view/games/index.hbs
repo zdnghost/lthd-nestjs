@@ -1,0 +1,49 @@
+{{#> main title=title}}
+<div class="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-md mt-6">
+  <h1 class="text-3xl font-bold text-gray-800 mb-6">🎮 Danh sách Game</h1>
+
+  <form method="post" action="/games" class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+    <input name="name" placeholder="Tên game" required 
+           class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+    <input name="description" placeholder="Mô tả" 
+           class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+    <input name="platforms" placeholder="Platforms (cách nhau bằng dấu phẩy)" 
+           class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+    <button type="submit" 
+            class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded transition">Thêm Game</button>
+  </form>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full bg-gray-50 rounded-lg overflow-hidden">
+      <thead class="bg-blue-500 text-white">
+        <tr>
+          <th class="px-4 py-2 text-left">Tên</th>
+          <th class="px-4 py-2 text-left">Mô tả</th>
+          <th class="px-4 py-2 text-left">Nền tảng</th>
+          <th class="px-4 py-2 text-left">Offers</th>
+          <th class="px-4 py-2 text-left">Hành động</th>
+        </tr>
+      </thead>
+      <tbody class="text-gray-700">
+        {{#each games}}
+        <tr class="border-b last:border-b-0 hover:bg-gray-100">
+          <td class="px-4 py-2"><a href="/games/{{this.id}}" class="text-blue-600 hover:underline">{{this.name}}</a></td>
+          <td class="px-4 py-2">{{this.description}}</td>
+          <td class="px-4 py-2">{{this.platforms}}</td>
+          <td class="px-4 py-2">{{this.offers.length}}</td>
+          <td class="px-4 py-2">
+            <form method="post" action="/games/{{this.id}}/delete" class="inline">
+              <button type="submit" 
+                      onclick="return confirm('Xóa game này?')"
+                      class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition">
+                Xóa
+              </button>
+            </form>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>
+{{/main}}

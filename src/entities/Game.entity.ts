@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Offer } from './Offer.entity.js';
+import type { Offer } from './Offer.entity.js';
 
 @Entity()
 export class Game {
@@ -15,6 +15,6 @@ export class Game {
     @Column({ type: 'simple-array' })
     platforms: string[];  
   
-    @OneToMany(() => Offer, (offer) => offer.game, { cascade: true, eager: true })
+    @OneToMany('Offer', 'game', { cascade: true, eager: true })
     offers: Offer[];
 }
