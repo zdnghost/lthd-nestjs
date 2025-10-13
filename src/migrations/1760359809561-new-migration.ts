@@ -12,3 +12,4 @@ export class NewMigration1760359809561 implements MigrationInterface {
     }
 
 }
+    
