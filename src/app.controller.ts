@@ -1,10 +1,17 @@
-import { Controller, Get ,Render} from '@nestjs/common';
+import { Controller, Get, Render, Request, Post, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service.js';
 import * as dotenv from 'dotenv';
+import { AuthGuard } from '@nestjs/passport';
 dotenv.config();
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  @UseGuards(AuthGuard('local'))
+  @Post('auth/login')
+  async login(@Request() req) {
+    return req.user;
+  }
+
+  constructor(private readonly appService: AppService) { }
 
   @Get('gemini')
   async getGeminiResponse() {
