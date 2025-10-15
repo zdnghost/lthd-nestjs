@@ -1,10 +1,12 @@
-import { Controller, Get ,Render} from '@nestjs/common';
+import { Controller, Get, Render, Request, Post, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service.js';
 import * as dotenv from 'dotenv';
+import { AuthGuard } from '@nestjs/passport';
 dotenv.config();
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+
+  constructor(private readonly appService: AppService) { }
 
   @Get('gemini')
   async getGeminiResponse() {
@@ -14,12 +16,22 @@ export class AppController {
   getHello(): string {
     return 'Hello World!';
   }
+
+  @Get('login')
+  @Render('login')
+  getLogin() {
+    return { layout:'layouts/auth',title: 'Đăng nhập' };
+  }
+
+
+  @UseGuards(AuthGuard('jwt'))
   @Get()
-  @Render('index') // Tự động render views/index.hbs
+  @Render('index')
   getHome() {
     return {
       title: 'Trang chủ',
-      name: 'Tuấn', // biến truyền vào view
+      name: 'Tuấn',
     };
   }
+
 }
