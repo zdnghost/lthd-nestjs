@@ -5,11 +5,6 @@ import { AuthGuard } from '@nestjs/passport';
 dotenv.config();
 @Controller()
 export class AppController {
-  @UseGuards(AuthGuard('local'))
-  @Post('auth/login')
-  async login(@Request() req) {
-    return req.user;
-  }
 
   constructor(private readonly appService: AppService) { }
 
@@ -21,12 +16,22 @@ export class AppController {
   getHello(): string {
     return 'Hello World!';
   }
+
+  @Get('login')
+  @Render('login')
+  getLogin() {
+    return { layout:'layouts/auth',title: 'Đăng nhập' };
+  }
+
+
+  @UseGuards(AuthGuard('jwt'))
   @Get()
-  @Render('index') // Tự động render views/index.hbs
+  @Render('index')
   getHome() {
     return {
       title: 'Trang chủ',
-      name: 'Tuấn', // biến truyền vào view
+      name: 'Tuấn',
     };
   }
+
 }

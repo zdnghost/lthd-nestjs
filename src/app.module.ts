@@ -7,9 +7,12 @@ import { GameModule } from './game/game.module.js';
 import { OfferModule } from './offer/offer.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
+import { JwtModule } from '@nestjs/jwt';
 import path from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+import { MiddlewareConsumer,  RequestMethod } from '@nestjs/common';
+import { AuthMiddleware } from './auth/auth.middleware.js';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -26,8 +29,22 @@ const __dirname = path.dirname(__filename);
     OfferModule,
     AuthModule,
     UsersModule,
+    JwtModule.register({
+      secret: process.env.TOKEN_SECRET, 
+      signOptions: { expiresIn: '1d' },
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuthMiddleware)
+      .exclude(
+        { path: 'login', method: RequestMethod.GET },
+        { path: 'auth/login', method: RequestMethod.POST },
+      )
+      .forRoutes('*');
+}
+}
