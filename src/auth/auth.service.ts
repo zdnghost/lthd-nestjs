@@ -12,18 +12,11 @@ export class AuthService {
 
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findUser(username);
-    
-    if (!user) {
-      return null;
-    }
-
-    const isPasswordValid = await bcrypt.compare(pass, user.password);
-    
-    if (isPasswordValid) {
+    // So sánh mật khẩu nhập vào với mật khẩu đã hash trong DB
+    if (user && await bcrypt.compare(pass, user.password)) {
       const { password, ...result } = user;
       return result;
     }
-    
     return null;
   }
 

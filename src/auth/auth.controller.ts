@@ -1,12 +1,63 @@
-import { Controller, Post, UseGuards, Request, Get, Render } from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Res, Get, Render, Body } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service.js'; // Import UsersService
 
 @Controller('auth')
 export class AuthController {
     
-    constructor(private jwtService: JwtService) { }
+    constructor(
+        private jwtService: JwtService,
+        private usersService: UsersService,
+    ) { }
     
+
+    @Get('register')
+    @Render('register') // Tạo view mới tên là register.hbs
+    showRegisterForm() {
+        return { layout: 'layouts/auth', title: 'Đăng ký' };
+    }
+
+
+    @Post('register')
+    async register(@Body() body: any, @Res() res) {
+        try {
+            // Kiểm tra xem username đã tồn tại chưa (tùy chọn)
+            const existingUser = await this.usersService.findUser(body.username);
+            if (existingUser) {
+                // Xử lý lỗi username đã tồn tại, ví dụ render lại form với thông báo lỗi
+                 return res.render('register', {
+                   layout: 'layouts/auth',
+                   title: 'Đăng ký',
+                   error: 'Tài khoản đã tồn tại.',
+                   username: body.username // Giữ lại username đã nhập
+                 });
+            }
+
+            // Tạo user mới
+            await this.usersService.create({
+                username: body.username,
+                password: body.password,
+                // Thêm các trường khác nếu cần (firstName, lastName, age...)
+                firstName: body.firstName || '',
+                lastName: body.lastName || '',
+                age: body.age ? parseInt(body.age, 10) : 0,
+            });
+
+            // Chuyển hướng đến trang đăng nhập sau khi đăng ký thành công
+            return res.redirect('/login');
+        } catch (error) {
+            console.error("Registration error:", error);
+             // Xử lý lỗi chung, ví dụ render lại form với thông báo lỗi chung
+             return res.render('register', {
+                layout: 'layouts/auth',
+                title: 'Đăng ký',
+                error: 'Đã có lỗi xảy ra trong quá trình đăng ký.',
+                username: body.username
+              });
+        }
+    }
+
     @UseGuards(AuthGuard('local'))
     @Post('login')
     async login(@Request() req) {

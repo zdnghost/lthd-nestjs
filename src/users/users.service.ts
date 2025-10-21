@@ -30,7 +30,6 @@ export class UsersService {
       throw new Error('Password is required');
     }
 
-    // Hash password trực tiếp trong UsersService
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
     
