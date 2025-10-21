@@ -11,7 +11,7 @@ import { RolesGuard } from './roles.guard.js';
 
 @Module({
   imports: [
-    UsersModule, 
+    UsersModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: jwtConstants.secret,

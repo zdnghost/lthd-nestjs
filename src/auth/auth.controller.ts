@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Request, Res,Get,Render } from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Get, Render } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtService } from '@nestjs/jwt';
 
@@ -6,13 +6,20 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthController {
     
     constructor(private jwtService: JwtService) { }
+    
     @UseGuards(AuthGuard('local'))
     @Post('login')
-    async login(@Request() req, @Res() res) {
+    async login(@Request() req) {
         const payload = { sub: req.user.id, username: req.user.username };
         const token = this.jwtService.sign(payload);
 
-        res.cookie('access_token', token, { httpOnly: true });
-        return res.redirect('/');
+        // Trả về JSON với access_token
+        return {
+            access_token: token,
+            user: {
+                id: req.user.id,
+                username: req.user.username
+            }
+        };
     }
 }
