@@ -27,3 +27,46 @@ export async function callGeminiApi(prompt: string) {
         throw new Error('Failed to call Gemini API');
     }
 }
+export async function parseHtmlWithGemini(html: string) {
+    const prompt = `
+Bạn là bot phân tích HTML của website bán game. Dưới đây là HTML của một trang sản phẩm:
+""" 
+${html}
+"""
+Hãy trích xuất ra JSON theo mẫu:
+{
+  "name": "Tên game",
+  "description": "Mô tả ngắn",
+  "platforms": "Steam",
+  "type": vi du "CD key", "gift","account"
+  "offers":
+  [
+    {
+      "shopingPlatform": shoping Platform,
+      "sellerName": business sellers name,
+      "price": price,
+      "promotionsPrice":promotionsPrice
+      "currency": currency,
+      "url": "https://...",
+      "stock": 20,
+      "platform": "Steam"
+    }
+  ]
+}
+Chỉ trả JSON thuần, không giải thích thêm.
+    `;
+    console.log('Gemini prompt response:', prompt);
+
+    const raw = await callGeminiApi(prompt);
+
+    console.log('Gemini raw response:', raw);
+    console.log(raw.candidates[0].content
+    );
+    const text = raw?.candidates?.[0]?.content?.parts?.[0]?.text.replace(/```json\n?/, '').replace(/```$/, '').trim();
+
+    try {
+        return JSON.parse(text);
+    } catch {
+        throw new Error('Gemini trả về không đúng JSON');
+    }
+} 
