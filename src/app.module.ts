@@ -44,6 +44,8 @@ export class AppModule {
       .exclude(
         { path: 'login', method: RequestMethod.GET },
         { path: 'auth/login', method: RequestMethod.POST },
+        { path: 'auth/register', method: RequestMethod.GET }, 
+        { path: 'auth/register', method: RequestMethod.POST },
       )
       .forRoutes('*');
 }
