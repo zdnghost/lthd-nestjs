@@ -1,7 +1,7 @@
 import { Controller, Post, UseGuards, Request, Res, Get, Render, Body } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service.js'; // Import UsersService
+import { UsersService } from '../users/users.service.js';
 
 @Controller('auth')
 export class AuthController {
@@ -53,6 +53,7 @@ export class AuthController {
 
     @UseGuards(AuthGuard('local'))
     @Post('login')
+<<<<<<< Updated upstream
     async login(@Request() req, @Res() res) {
       const payload = { sub: req.user.id, username: req.user.username };
       const token = this.jwtService.sign(payload);
@@ -65,6 +66,20 @@ export class AuthController {
       });
     
       return res.redirect('/');
+=======
+    async login(@Request() req) {
+        const payload = { sub: req.user.id, username: req.user.username };
+        const token = this.jwtService.sign(payload);
+
+        
+        return {
+            access_token: token,
+            user: {
+                id: req.user.id,
+                username: req.user.username
+            }
+        };
+>>>>>>> Stashed changes
     }
     
 }
