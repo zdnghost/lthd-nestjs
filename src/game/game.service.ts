@@ -44,5 +44,39 @@ export class GamesService {
     });
     return this.offerRepo.save(offer);
   }
+  async importFromJson(data: any): Promise<Game> {
+    const { name, description, platforms, type, offers } = data;
 
+    let existing = await this.gameRepo.findOne({
+      where: { name },
+      relations: ['offers'],
+    });
+
+    if (!existing) {
+      existing = this.gameRepo.create({
+        name,
+        description,
+        platforms,
+        type,
+      });
+      existing = await this.gameRepo.save(existing);
+    } else {
+      existing.description = description;
+      existing.platforms = platforms;
+      existing.type = type;
+      existing = await this.gameRepo.save(existing);
+    }
+
+    if (Array.isArray(offers)) {
+      for (const offerData of offers) {
+        const newOffer = this.offerRepo.create({
+          ...offerData,
+          game: existing,
+        });
+        await this.offerRepo.save(newOffer);
+      }
+    }
+
+    return existing;
+  }
 }

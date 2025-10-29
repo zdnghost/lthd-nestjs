@@ -22,7 +22,11 @@ export class AppController {
   getLogin() {
     return { layout:'layouts/auth',title: 'Đăng nhập' };
   }
-
+  @Get('register')
+  @Render('register') // Tạo view mới tên là register.hbs
+  showRegisterForm() {
+      return { layout: 'layouts/auth', title: 'Đăng ký' };
+  }
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
