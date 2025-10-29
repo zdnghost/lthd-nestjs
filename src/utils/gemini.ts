@@ -42,7 +42,7 @@ Hãy trích xuất ra JSON theo mẫu:
   "offers":
   [
     {
-      "shopingPlatform": shoping Platform,
+      "shoppingPlatform": shopping Platform,
       "sellerName": business sellers name,
       "price": price,
       "promotionsPrice":promotionsPrice
@@ -55,11 +55,9 @@ Hãy trích xuất ra JSON theo mẫu:
 }
 Chỉ trả JSON thuần, không giải thích thêm.
     `;
-    console.log('Gemini prompt response:', prompt);
 
     const raw = await callGeminiApi(prompt);
 
-    console.log('Gemini raw response:', raw);
     console.log(raw.candidates[0].content
     );
     const text = raw?.candidates?.[0]?.content?.parts?.[0]?.text.replace(/```json\n?/, '').replace(/```$/, '').trim();

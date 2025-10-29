@@ -12,13 +12,6 @@ export class AuthController {
     ) { }
     
 
-    @Get('register')
-    @Render('register') // Tạo view mới tên là register.hbs
-    showRegisterForm() {
-        return { layout: 'layouts/auth', title: 'Đăng ký' };
-    }
-
-
     @Post('register')
     async register(@Body() body: any, @Res() res) {
         try {
@@ -60,17 +53,18 @@ export class AuthController {
 
     @UseGuards(AuthGuard('local'))
     @Post('login')
-    async login(@Request() req) {
-        const payload = { sub: req.user.id, username: req.user.username };
-        const token = this.jwtService.sign(payload);
-
-        // Trả về JSON với access_token
-        return {
-            access_token: token,
-            user: {
-                id: req.user.id,
-                username: req.user.username
-            }
-        };
+    async login(@Request() req, @Res() res) {
+      const payload = { sub: req.user.id, username: req.user.username };
+      const token = this.jwtService.sign(payload);
+    
+      res.cookie('access_token', token, {
+        httpOnly: true,
+        secure: false, // production thì bật true (HTTPS)
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000 // 1 day
+      });
+    
+      return res.redirect('/');
     }
+    
 }

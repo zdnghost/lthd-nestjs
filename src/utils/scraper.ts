@@ -1,14 +1,20 @@
 import { Builder, Browser, By, until } from 'selenium-webdriver';
-// @ts-ignore
 import chrome from 'selenium-webdriver/chrome.js';
 import * as cheerio from 'cheerio';
-
+import * as dotenv from 'dotenv';
 export class ScraperService {
-  private driver: any;
+  constructor() { }
 
-  constructor() {
 
+
+  async getRawHtml(url: string): Promise<string> {
+    const chromeDriverPath = process.env.CHROME_DRIVER_PATH;
+    const chromeExePath = process.env.CHROME_EXE_PATH;
+    if (!chromeDriverPath || !chromeExePath) {
+      throw new Error('Missing Chrome configuration in environment variables');
+    }
     const options = new chrome.Options();
+    options.setChromeBinaryPath(chromeExePath);
     options.addArguments(
       //'--headless',
       '--log-level=3',
@@ -41,29 +47,27 @@ export class ScraperService {
 
     );
 
-    this.driver = new Builder()
+    const driver = new Builder()
       .forBrowser(Browser.CHROME)
       .setChromeOptions(options)
+      .setChromeService(new chrome.ServiceBuilder(chromeDriverPath))
       .build();
-  }
-
-  async getRawHtml(url: string): Promise<string> {
     try {
-      await this.driver.get(url);
-
-      await this.driver.wait(async () => {
-        const readyState = await this.driver.executeScript('return document.readyState');
+      console.log(`Starting to scrape ${url}`);
+      await driver.get(url);
+      console.log(`Navigated to ${url}`);
+      await driver.wait(async () => {
+        const readyState = await driver.executeScript('return document.readyState');
         return readyState === 'complete';
       }, 100000);
-      
-    
-      const html = await this.driver.getPageSource();
+      console.log(`Page loaded: ${url}`);
+      const html = await driver.getPageSource();
       const $ = cheerio.load(html);
       const tagsToRemove = [
         'script', 'noscript', 'svg', 'iframe', 'head', 'style',
         'source', 'footer', 'button', 'input', 'link',
         'form', 'td', 'tr', 'table', 'meta', 'i', 'option', 'video', 'label',
-        'hr', 'br', 'select', 'title', 'textarea', 'aside','audio'
+        'hr', 'br', 'select', 'title', 'textarea', 'aside', 'audio'
       ];
       tagsToRemove.forEach(tag => $(tag).remove());
       const attrsToRemove = [
@@ -78,15 +82,10 @@ export class ScraperService {
       });
       return $.html();
     } catch (error) {
-      console.error('Scraping error:', error);
       throw new Error('Failed to scrape page');
     }
     finally {
-      await this.close();
+      await driver.close();
     }
-  }
-
-  async close() {
-    await this.driver.quit();
-  }
+  }    
 }
