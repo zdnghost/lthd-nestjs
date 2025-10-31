@@ -53,20 +53,6 @@ export class AuthController {
 
     @UseGuards(AuthGuard('local'))
     @Post('login')
-<<<<<<< Updated upstream
-    async login(@Request() req, @Res() res) {
-      const payload = { sub: req.user.id, username: req.user.username };
-      const token = this.jwtService.sign(payload);
-    
-      res.cookie('access_token', token, {
-        httpOnly: true,
-        secure: false, // production thì bật true (HTTPS)
-        sameSite: 'lax',
-        maxAge: 24 * 60 * 60 * 1000 // 1 day
-      });
-    
-      return res.redirect('/');
-=======
     async login(@Request() req) {
         const payload = { sub: req.user.id, username: req.user.username };
         const token = this.jwtService.sign(payload);
@@ -79,7 +65,6 @@ export class AuthController {
                 username: req.user.username
             }
         };
->>>>>>> Stashed changes
     }
     
 }

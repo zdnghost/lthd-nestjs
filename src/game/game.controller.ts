@@ -1,12 +1,4 @@
-<<<<<<< Updated upstream
-import { Controller, Get, Post, Param, Body, Redirect, Render, Query } from '@nestjs/common';
-=======
 import { Controller, Get, Post, Param, Body, Redirect, Render,UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { Roles } from '../auth/roles.decorator.js';
-import { RolesGuard } from '../auth/roles.guard.js';
-import { UserRole } from '../entities/User.entity.js';
->>>>>>> Stashed changes
 import { GamesService } from './game.service.js';
 import { ScraperService } from '../utils/scraper.js';
 import { parseHtmlWithGemini } from '../utils/gemini.js';
@@ -68,7 +60,6 @@ export class GameController {
       console.log('Parsed result:', result);
       const game = await this.games.importFromJson(result);
 
-<<<<<<< Updated upstream
       return {
         message: 'Import thành công',
         game,
@@ -78,37 +69,6 @@ export class GameController {
         error: 'Import thất bại',
         detail: err.message ?? err,
       };
-=======
-    @Post()
-    @Redirect('/games')
-    async create(@Body() body: any) {
-        await this.games.create({
-            name: body.name,
-            description: body.description,
-            platforms: body.platforms.split(',').map((p) => p.trim()),
-        });
-    }
-
-    @Get(':id')
-    @Render('games/detail')
-    async detail(@Param('id') id: string) {
-        const game = await this.games.findOne(id);
-        return { game };
-    }
-
-    @UseGuards(AuthGuard('jwt'), RolesGuard)
-    @Roles(UserRole.ADMIN)
-    @Post(':id/delete')
-    @Redirect('/games')
-    async delete(@Param('id') id: string) {
-        await this.games.delete(id);
-    }
-
-    @Post(':id/offers')
-    async addOffer(@Param('id') id: string, @Body() body: any) {
-        await this.games.addOffer(id, body);
-        return { redirect: `/games/${id}` };
->>>>>>> Stashed changes
     }
   }
 }
