@@ -28,7 +28,7 @@ export class AppController {
       return { layout: 'layouts/auth', title: 'Đăng ký' };
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('jwt'))
   @Get()
   @Render('index')
   getHome() {

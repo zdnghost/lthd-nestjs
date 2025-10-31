@@ -1,8 +1,10 @@
+import { OfferHistory } from '../entities/OfferHistory.entity.js';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Game } from '../entities/Game.entity.js';
 import { Offer } from '../entities/Offer.entity.js';
+
 
 
 @Injectable()
@@ -12,6 +14,8 @@ export class GamesService {
     private readonly gameRepo: Repository<Game>,
     @InjectRepository(Offer)
     private readonly offerRepo: Repository<Offer>,
+    @InjectRepository(OfferHistory)
+    private readonly offerHistoryRepo: Repository<OfferHistory>,
   ) {}
 
   findAll() {
@@ -47,6 +51,7 @@ export class GamesService {
   async importFromJson(data: any): Promise<Game> {
     const { name, description, platforms, type, offers } = data;
 
+    // 🔹 Tìm hoặc tạo Game
     let existing = await this.gameRepo.findOne({
       where: { name },
       relations: ['offers'],
@@ -59,24 +64,63 @@ export class GamesService {
         platforms,
         type,
       });
-      existing = await this.gameRepo.save(existing);
     } else {
       existing.description = description;
       existing.platforms = platforms;
       existing.type = type;
-      existing = await this.gameRepo.save(existing);
     }
 
+    existing = await this.gameRepo.save(existing);
+
+    // 🔹 Xử lý danh sách Offer
     if (Array.isArray(offers)) {
       for (const offerData of offers) {
-        const newOffer = this.offerRepo.create({
-          ...offerData,
-          game: existing,
+        const { sellerName, shoppingPlatform } = offerData;
+
+        if (!sellerName || !shoppingPlatform) continue; // tránh lỗi dữ liệu thiếu
+
+        // Tìm offer theo sellerName + shoppingPlatform + game
+        
+        let offer = await this.offerRepo.findOne({
+          where: {
+            sellerName,
+            shoppingPlatform,
+            game: { id: existing.id },
+          },
+          relations: ['histories'],
         });
-        await this.offerRepo.save(newOffer);
+
+        if (!offer) {
+          let offer = this.offerRepo.create({
+            ...offerData,
+            game: existing,
+          });
+          offer = await this.offerRepo.save(offer);
+        } else {
+          offer.price = offerData.price;
+          offer.promotionsPrice = offerData.promotionsPrice;
+          offer.currency = offerData.currency;
+          offer.platform = offerData.platform;
+          offer = await this.offerRepo.save(offer);
+        }
+
+        console.log(offer);
+
+        if (offer) {
+          const history = this.offerHistoryRepo.create({
+            offer,
+            price: offer.price,
+            promotionPrice: offer.promotionsPrice,
+            currency: offer.currency,
+            recordedAt: new Date(),
+          });
+          await this.offerHistoryRepo.save(history);
+          console.log('Saved history:', history);
+        }
       }
     }
 
     return existing;
   }
+  
 }
