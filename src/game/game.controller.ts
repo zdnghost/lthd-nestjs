@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Redirect, Render, Query } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Redirect, Render,UseGuards } from '@nestjs/common';
 import { GamesService } from './game.service.js';
 import { ScraperService } from '../utils/scraper.js';
 import { parseHtmlWithGemini } from '../utils/gemini.js';

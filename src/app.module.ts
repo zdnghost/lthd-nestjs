@@ -2,17 +2,19 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { fileURLToPath, } from 'url';
+import { fileURLToPath } from 'url';
 import { GameModule } from './game/game.module.js';
 import { OfferModule } from './offer/offer.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
 import { JwtModule } from '@nestjs/jwt';
 import path from 'path';
+import { MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { AuthMiddleware } from './auth/auth.middleware.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import { MiddlewareConsumer,  RequestMethod } from '@nestjs/common';
-import { AuthMiddleware } from './auth/auth.middleware.js';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -42,11 +44,15 @@ export class AppModule {
     consumer
       .apply(AuthMiddleware)
       .exclude(
+        // Exclude các route public
         { path: 'login', method: RequestMethod.GET },
+        { path: 'register', method: RequestMethod.GET },
         { path: 'auth/login', method: RequestMethod.POST },
-        { path: 'auth/register', method: RequestMethod.GET }, 
         { path: 'auth/register', method: RequestMethod.POST },
+        // Exclude static assets nếu có
+        { path: 'public/(.*)', method: RequestMethod.ALL },
+        { path: 'assets/(.*)', method: RequestMethod.ALL },
       )
       .forRoutes('*');
-}
+  }
 }
