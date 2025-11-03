@@ -4,11 +4,17 @@ import { AppModule } from './app.module.js';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import hbs from 'hbs';
+import cookieParser from 'cookie-parser';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  
+  // Thêm cookie-parser middleware
+  app.use(cookieParser());
+  
   const viewPath = join(__dirname, '..', '..', 'view');
   app.set('views', viewPath);
   app.set('view engine', 'hbs');

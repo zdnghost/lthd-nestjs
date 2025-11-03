@@ -2,7 +2,9 @@ import { Controller, Get, Render, Request, Post, UseGuards } from '@nestjs/commo
 import { AppService } from './app.service.js';
 import * as dotenv from 'dotenv';
 import { AuthGuard } from '@nestjs/passport';
+
 dotenv.config();
+
 @Controller()
 export class AppController {
 
@@ -20,22 +22,30 @@ export class AppController {
   @Get('login')
   @Render('login')
   getLogin() {
-    return { layout:'layouts/auth',title: 'Đăng nhập' };
+    return { 
+      layout: 'layouts/auth',
+      title: 'Đăng nhập' 
+    };
   }
+
   @Get('register')
-  @Render('register') // Tạo view mới tên là register.hbs
+  @Render('register')
   showRegisterForm() {
-      return { layout: 'layouts/auth', title: 'Đăng ký' };
+    return { 
+      layout: 'layouts/auth', 
+      title: 'Đăng ký' 
+    };
   }
 
   // @UseGuards(AuthGuard('jwt'))
   @Get()
   @Render('index')
-  getHome() {
+  getHome(@Request() req) {
+    // req.user được gán bởi JWT Strategy sau khi verify token thành công
     return {
       title: 'Trang chủ',
-      name: 'Tuấn',
+      name: req.user?.username || 'Guest',
+      user: req.user, // Truyền toàn bộ thông tin user vào view
     };
   }
-
 }
