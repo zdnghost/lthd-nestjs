@@ -37,7 +37,7 @@ export class AppController {
     };
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('jwt'))
   @Get()
   @Render('index')
   getHome(@Request() req) {
