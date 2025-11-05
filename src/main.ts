@@ -5,10 +5,12 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import hbs from 'hbs';
 import cookieParser from 'cookie-parser';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   
@@ -16,11 +18,23 @@ async function bootstrap() {
   app.use(cookieParser());
   
   const viewPath = join(__dirname, '..', '..', 'view');
-  app.set('views', viewPath);
-  app.set('view engine', 'hbs');
-  hbs.registerPartials(join(viewPath, 'partials'));
-  app.set('view options', { layout: 'layouts/main' });
+  const partialsPath = join(viewPath, 'partials');
 
+  app.setBaseViewsDir(viewPath);
+  app.setViewEngine('hbs');
+  hbs.registerPartials(partialsPath);
+  app.set('view options', { layout: 'layouts/main' });
+  app.set('view cache', false); // Tắt cache Handlebars
+
+  if (process.env.NODE_ENV !== 'production') {
+    fs.watch(partialsPath, (eventType, filename) => {
+      if (filename && filename.endsWith('.hbs')) {
+        console.log(`♻️ Reload partial: ${filename}`);
+        hbs.registerPartials(partialsPath);
+      }
+    });
+  }
+  
   await app.listen(process.env.PORT ?? 3000);
   console.log(`🚀 Server chạy tại: http://localhost:${process.env.PORT ?? 3000}`);
 }
