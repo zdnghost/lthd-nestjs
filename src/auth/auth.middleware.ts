@@ -8,8 +8,6 @@ export class AuthMiddleware implements NestMiddleware {
   use(req: any, res: any, next: () => void) {
     const token = req.cookies?.access_token;
     
-    console.log('AuthMiddleware - Path:', req.path);
-    console.log('AuthMiddleware - Token:', token ? 'exists' : 'not found');
     
     if (!token) {
       console.log('No token, redirecting to /login');
@@ -18,7 +16,6 @@ export class AuthMiddleware implements NestMiddleware {
 
     try {
       const decoded = this.jwtService.verify(token);
-      console.log('Token verified:', decoded);
       req.user = decoded; // Gán user vào request
       next();
     } catch (error) {
