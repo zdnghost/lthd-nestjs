@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Redirect, Render,UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Redirect, Render, UseGuards } from '@nestjs/common';
 import { GamesService } from './game.service.js';
 import { ScraperService } from '../utils/scraper.js';
 import { parseHtmlWithGemini } from '../utils/gemini.js';
@@ -8,7 +8,7 @@ export class GameController {
   constructor(
     private readonly games: GamesService,
     private readonly scraper: ScraperService,
-  ) {}
+  ) { }
 
 
 
@@ -54,8 +54,7 @@ export class GameController {
     }
     const scraper = new ScraperService();
     try {
-      
-      const html = await scraper.getRawHtml(url); ;
+      const html = await scraper.getRawHtml(url);;
       const result = await parseHtmlWithGemini(html);
       console.log('Parsed result:', result);
       const game = await this.games.importFromJson(result);
@@ -63,6 +62,51 @@ export class GameController {
       return {
         message: 'Import thành công',
         game,
+      };
+    } catch (err) {
+      return {
+        error: 'Import thất bại',
+        detail: err.message ?? err,
+      };
+    }
+  }
+  @Post('search')
+  async searchGames(@Body('query') query: string) {
+    if (!query) {
+      return { error: 'Query is required' };
+    }
+    try {
+      const scraper = new ScraperService();
+      const listUrls = await scraper.getProductLinks(query);
+      const maxConcurrent = 3;
+      const results: {
+        url: string;
+        status: string;
+        game?: any;
+        error?: string;
+      }[] = [];  
+      for (let i = 0; i < listUrls.length; i += maxConcurrent) {
+        const chunk = listUrls.slice(i, i + maxConcurrent);
+        const batch = chunk.map(async (url) => {
+          try {
+            const html = await scraper.getRawHtml(url);
+            const parsed = await parseHtmlWithGemini(html);
+            const game = await this.games.importFromJson(parsed);
+            return { url, status: 'success', game };
+          } catch (err) {
+            return { url, status: 'failed', error: err.message };
+          }
+        });
+        const batchResults = await Promise.all(batch);
+        results.push(...batchResults);
+      }
+  
+      return {
+        message: 'Hoàn tất import hàng loạt',
+        total: results.length,
+        success: results.filter(r => r.status === 'success').length,
+        failed: results.filter(r => r.status === 'failed').length,
+        results,
       };
     } catch (err) {
       return {

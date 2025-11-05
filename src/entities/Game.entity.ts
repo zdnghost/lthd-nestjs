@@ -12,7 +12,7 @@ export class Game {
     @Column({ type: 'text', nullable: true })
     description?: string;
 
-    @Column({ type: 'simple-array' })
+    @Column({ type: 'simple-array' , nullable: true })
     platforms: string[];
 
     @Column({ type: 'varchar', length: 50, nullable: true })
