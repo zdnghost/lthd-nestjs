@@ -13,10 +13,10 @@ const __dirname = dirname(__filename);
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  
+
   // Thêm cookie-parser middleware
   app.use(cookieParser());
-  
+
   const viewPath = join(__dirname, '..', '..', 'view');
   const partialsPath = join(viewPath, 'partials');
 
@@ -34,9 +34,11 @@ async function bootstrap() {
       }
     });
   }
-  
+
   await app.listen(process.env.PORT ?? 3000);
-  console.log(`🚀 Server chạy tại: http://localhost:${process.env.PORT ?? 3000}`);
+  console.log(
+    `🚀 Server chạy tại: http://localhost:${process.env.PORT ?? 3000}`,
+  );
 }
 
 bootstrap();

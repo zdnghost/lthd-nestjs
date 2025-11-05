@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import type { Game } from './Game.entity.js';
 import { OfferHistory } from './OfferHistory.entity.js';
 
@@ -10,12 +16,12 @@ export class Offer {
   @ManyToOne('Game', 'offers', { onDelete: 'CASCADE' })
   game: Game;
 
-  @Column({ type: 'varchar', length: 100 , nullable: true})
+  @Column({ type: 'varchar', length: 100, nullable: true })
   shoppingPlatform: string;
 
   @Column({ type: 'varchar', length: 150 })
   sellerName: string;
-  
+
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   price: number;
 

@@ -32,12 +32,12 @@ export class UsersService {
 
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
-    
+
     const user = this.usersRepository.create({
       ...userData,
-      password: hashedPassword
+      password: hashedPassword,
     });
-    
+
     return this.usersRepository.save(user);
   }
 

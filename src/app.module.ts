@@ -32,7 +32,7 @@ const __dirname = path.dirname(__filename);
     AuthModule,
     UsersModule,
     JwtModule.register({
-      secret: process.env.TOKEN_SECRET, 
+      secret: process.env.TOKEN_SECRET,
       signOptions: { expiresIn: '1d' },
     }),
   ],

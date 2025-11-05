@@ -5,8 +5,6 @@ import { Repository } from 'typeorm';
 import { Game } from '../entities/Game.entity.js';
 import { Offer } from '../entities/Offer.entity.js';
 
-
-
 @Injectable()
 export class GamesService {
   constructor(
@@ -80,7 +78,7 @@ export class GamesService {
         if (!sellerName || !shoppingPlatform) continue; // tránh lỗi dữ liệu thiếu
 
         // Tìm offer theo sellerName + shoppingPlatform + game
-        
+
         let offer = await this.offerRepo.findOne({
           where: {
             sellerName,
@@ -122,5 +120,4 @@ export class GamesService {
 
     return existing;
   }
-  
 }

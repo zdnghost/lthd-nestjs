@@ -7,8 +7,7 @@ export class AuthMiddleware implements NestMiddleware {
 
   use(req: any, res: any, next: () => void) {
     const token = req.cookies?.access_token;
-    
-    
+
     if (!token) {
       console.log('No token, redirecting to /login');
       return res.redirect('/login');
