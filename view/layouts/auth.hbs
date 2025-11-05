@@ -6,13 +6,24 @@
     <title>{{title}}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../style/styles.css" />
-
 </head>
 
-<body class="min-h-screen flex items-center justify-center">
-    <main class="w-full max-w-md p-6 rounded-lg">
+<body class="bg-gray-800 min-h-screen flex items-center justify-center p-4">
+    <main class="w-full max-w-sm transform opacity-0 
+                 animate-fadeInUp">
         {{{body}}}
     </main>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const main = document.querySelector('main');
+            if (main) {
+                // Kích hoạt animation form khi trang tải xong
+                main.classList.remove('opacity-0');
+                main.classList.add('opacity-100', 'translate-y-0');
+            }
+        });
+    </script>
 </body>
 
 </html>

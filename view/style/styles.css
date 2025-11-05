@@ -1,0 +1,51 @@
+/*
+ * ---------------------------------------
+ * SWUP PAGE TRANSITION CSS (Thêm vào styles.css)
+ * ---------------------------------------
+ */
+#swup {
+  /* Quan trọng: Cho phép CSS transition kiểm soát chuyển động */
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.3s ease-out,
+    transform 0.3s ease-out;
+}
+
+/* 1. Khi trang cũ đang OUT */
+html.is-leaving #swup {
+  opacity: 0; /* Mờ dần */
+  transform: translateY(-10px); /* Kéo lên nhẹ */
+}
+
+/* 2. Khi trang mới đang IN (trước khi DOM mới tải) */
+html.is-rendering #swup {
+  opacity: 0; /* Bắt đầu từ 0 */
+}
+
+/* 3. Sau khi trang mới đã render và sẵn sàng (Ready) */
+html.is-rendering.is-ready #swup {
+  opacity: 1; /* Hiện ra */
+  transform: translateY(0);
+}
+
+/* * ---------------------------------------
+ * FORM ANIMATION (Giữ nguyên cho auth.hbs)
+ * ---------------------------------------
+ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* ... các style khác của bạn ... */
