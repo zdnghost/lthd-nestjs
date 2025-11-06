@@ -1,9 +1,10 @@
 import { OfferHistory } from '../entities/OfferHistory.entity.js';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository, ILike } from 'typeorm';
 import { Game } from '../entities/Game.entity.js';
 import { Offer } from '../entities/Offer.entity.js';
+import { User } from '../entities/User.entity.js';
 
 @Injectable()
 export class GamesService {
@@ -14,6 +15,8 @@ export class GamesService {
     private readonly offerRepo: Repository<Offer>,
     @InjectRepository(OfferHistory)
     private readonly offerHistoryRepo: Repository<OfferHistory>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
   ) {}
 
   findAll() {

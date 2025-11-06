@@ -28,7 +28,7 @@ export class GameController {
     const user = req.user;
     const games = await this.games.findGamesByUser(user);
     //const games = [];
-    return { title: 'Game', games };
+    return { title: 'Game', games, user };
   }
 
   @Post()
@@ -66,12 +66,12 @@ export class GameController {
       return { error: 'URL is required' };
     }
     const user = req.user;
-    await this.scraper.initDriver();
+    const scraper = new ScraperService();
     try {
       const html = await scraper.getRawHtml(url);
       const result = await parseHtmlWithGemini(html);
-      console.log('Parsed result:', result);
-      const game = await this.games.importFromJson(result);
+
+      const game = await this.games.importFromJson(result, user);
 
       return {
         message: 'Import thành công',
@@ -91,8 +91,8 @@ export class GameController {
       return { error: 'Query is required' };
     }
     const user = req.user;
+    const scraper = new ScraperService();
     try {
-      const scraper = new ScraperService();
       const listUrls = await scraper.getProductLinks(query);
       const maxConcurrent = 3;
       const results: {
