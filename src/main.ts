@@ -11,6 +11,22 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+
+hbs.registerHelper('multiply', (a, b) => {
+  // Helper để nhân (cho animation delay)
+  return a * b;
+});
+
+hbs.registerHelper('eq', (a, b) => {
+  // Helper để so sánh
+  return a === b;
+});
+hbs.registerHelper('json', (context) => {
+  // Helper RẤT hữu ích để debug
+  // Giúp bạn in ra object trong file .hbs: {{{json myObject}}}
+  return JSON.stringify(context, null, 2);
+});
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 

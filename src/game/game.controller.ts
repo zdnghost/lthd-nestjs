@@ -23,6 +23,7 @@ export class GameController {
   @Render('games/index')
   async list() {
     const games = await this.games.findAll();
+    //const games = [];
     return { title: 'Game', games };
   }
 
