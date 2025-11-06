@@ -24,6 +24,21 @@ export class GamesService {
     return this.gameRepo.findOne({ where: { id }, relations: ['offers'] });
   }
 
+  async findGamesByUser(user: User) {
+    if (!user || !user.id) {
+      return [];
+    }
+    const userWithFavorites = await this.userRepo.findOne({
+      where: { id: user.id },
+      relations: ['favoriteGames', 'favoriteGames.offers'],
+    });
+
+    if (!userWithFavorites) {
+      return [];
+    }
+    return userWithFavorites.favoriteGames;
+  }
+
   create(data: Partial<Game>) {
     const newGame = this.gameRepo.create(data);
     return this.gameRepo.save(newGame);
@@ -46,13 +61,12 @@ export class GamesService {
     });
     return this.offerRepo.save(offer);
   }
-  async importFromJson(data: any): Promise<Game> {
+  async importFromJson(data: any, user: User): Promise<Game> {
     const { name, description, platforms, type, offers } = data;
 
     // 🔹 Tìm hoặc tạo Game
     let existing = await this.gameRepo.findOne({
-      where: { name },
-      relations: ['offers'],
+      where: { name: ILike(name) },
     });
 
     if (!existing) {
@@ -116,8 +130,36 @@ export class GamesService {
           console.log('Saved history:', history);
         }
       }
+    } else {
+      console.log(`Game "${name}" đã có trong CSDL. Chỉ gán user.`);
     }
-
+    await this.linkGameToUser(existing, user);
     return existing;
+  }
+  async linkGameToUser(game: Game, user: User): Promise<void> {
+    if (!user || !user.id || !game) {
+      return;
+    }
+    const userWithFavorites = await this.userRepo.findOne({
+      where: { id: user.id },
+      relations: ['favoriteGames'],
+    });
+    if (userWithFavorites) {
+      const isAlreadyFavorited = userWithFavorites.favoriteGames.some(
+        (favGame) => favGame.id === game.id,
+      );
+
+      if (!isAlreadyFavorited) {
+        userWithFavorites.favoriteGames.push(game);
+        await this.userRepo.save(userWithFavorites);
+        console.log(
+          `Đã liên kết game "${game.name}" với user "${user.username}".`,
+        );
+      } else {
+        console.log(
+          `User ${user.username} đã có game "${game.name}" trong danh sách yêu thích.`,
+        );
+      }
+    }
   }
 }

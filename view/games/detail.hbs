@@ -1,39 +1,84 @@
 {{#> main title=game.name}}
-<div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-6">
-  <h1 class="text-3xl font-bold text-gray-800 mb-4">{{game.name}}</h1>
 
-  <p class="mb-2 text-bold text-black"><b>Mô tả:</b> {{game.description}}</p>
-  <p class="mb-4"><b>Nền tảng:</b> {{game.platforms}}</p>
-
-  <h2 class="text-2xl font-bold text-black mb-4">Offers</h2>
-
-  <!-- Form thêm offer -->
-  <form method="post" action="/games/{{game.id}}/offers" class="mb-6 grid grid-cols-1 md:grid-cols-5 gap-3">
-    <input name="sellerName" placeholder="Seller" required class="border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400"/>
-    <input name="price" placeholder="Giá" required class="border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400"/>
-    <input name="currency" value="USD" class="border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400"/>
-    <input name="platform" placeholder="Platform" class="border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400"/>
-    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Thêm Offer</button>
-  </form>
-
-  <!-- List offers -->
-  <ul class="list-disc pl-5 space-y-2">
-    {{#each game.offers}}
-    <li class="flex items-center justify-between bg-gray-50 p-2 rounded hover:bg-gray-100">
-      <div>
-        💰 {{this.sellerName}} - {{this.price}} {{this.currency}}
-        (<span>{{#if this.platform}}{{this.platform}}{{else}}All{{/if}}</span>)
-        <a href="{{this.url}}" target="_blank" class="text-blue-600 hover:underline ml-2">Link</a>
+<div class="max-w-6xl mx-auto">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-1 bg-gray-800 p-6 rounded-2xl shadow-lg h-fit sticky top-24">
+      <a href="/games" class="inline-flex items-center text-indigo-400 hover:text-indigo-300 transition-colors mb-4 group">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1">
+          <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" />
+        </svg>
+        Trở lại danh sách
+      </a>
+      <h3 class="text-lg font-semibold text-white mb-3">Được bán trên nền tảng</h3>
+      <div class="flex flex-wrap gap-2">
+        {{#each game.platforms}}
+          <span class="text-xl font-medium bg-gray-700 text-gray-300 px-3 py-1 rounded-full">
+            {{this}}
+          </span>
+        {{else}}
+          <span class="text-xl text-gray-400">Chưa rõ</span>
+        {{/each}}
       </div>
-      <form method="post" action="/offers/{{this.id}}/delete" class="inline">
-        <button type="submit" onclick="return confirm('Xóa offer này?')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
-          Xóa
-        </button>
-      </form>
-    </li>
-    {{/each}}
-  </ul>
+    </div>
 
-  <a href="/games" class="inline-block mt-6 text-blue-600 hover:underline">⬅ Trở lại danh sách</a>
+    <div class="lg:col-span-2">
+      <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mb-8">
+        <h1 class="text-4xl font-bold text-white mb-3">{{game.name}}</h1>
+        <p class="text-gray-300 leading-relaxed">{{game.description}}</p>
+      </div>
+
+      <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+        <h2 class="text-2xl font-bold text-white mb-4">Danh sách Offers</h2>
+
+        <div class="overflow-x-auto rounded-lg border border-gray-700 mb-6">
+          <table class="min-w-full divide-y divide-gray-700">
+            <thead class="bg-gray-700/50">
+              <tr>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Nguồn</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Giá</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Nền tảng</th>
+                <!--<th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Link</th>-->
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-red-500 uppercase">Xóa</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700">
+              {{#each game.offers}}
+                <tr class="hover:bg-gray-700/30 transition-colors">
+                  <td class="px-4 py-3 text-sm text-white whitespace-nowrap">{{this.sellerName}}</td>
+                  <td class="px-4 py-3 text-sm text-green-400 font-bold whitespace-nowrap">
+                    {{this.price}} {{this.currency}}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-300">
+                    <span class="text-xs font-medium bg-gray-700 text-gray-300 px-2 py-1 rounded-full">
+                      {{#if this.platform}}{{this.platform}}{{else}}All{{/if}}
+                    </span>
+                  </td>
+                  <!--
+                  <td class="px-4 py-3 text-sm">
+                    <a href="{{this.url}}" target="_blank" 
+                       class="text-indigo-400 hover:text-indigo-300 font-medium">Mua ngay</a>
+                  </td>
+                  -->
+                  <td class="px-4 py-3 text-sm">
+                    <form method="post" action="/offers/{{this.id}}/delete" class="inline">
+                      <button type="submit" onclick="return confirm('Xóa offer này?')" 
+                              class="text-red-400 border-red-200 hover:text-red-300 font-medium">
+                        Xóa
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              {{else}}
+                <tr>
+                  <td colspan="5" class="px-4 py-3 text-sm text-gray-400 text-center">
+                    Chưa có offer nào cho game này.
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+    </div>
+  </div>
 </div>
 {{/main}}

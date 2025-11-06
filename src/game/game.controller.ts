@@ -7,10 +7,12 @@ import {
   Redirect,
   Render,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { GamesService } from './game.service.js';
 import { ScraperService } from '../utils/scraper.js';
 import { parseHtmlWithGemini } from '../utils/gemini.js';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('games')
 export class GameController {
@@ -21,8 +23,10 @@ export class GameController {
 
   @Get()
   @Render('games/index')
-  async list() {
-    const games = await this.games.findAll();
+  @UseGuards(AuthGuard('jwt'))
+  async list(@Request() req) {
+    const user = req.user;
+    const games = await this.games.findGamesByUser(user);
     //const games = [];
     return { title: 'Game', games };
   }
@@ -56,11 +60,13 @@ export class GameController {
     return { redirect: `/games/${id}` };
   }
   @Post('import')
-  async importGame(@Body('url') url: any) {
+  @UseGuards(AuthGuard('jwt'))
+  async importGame(@Body('url') url: any, @Request() req) {
     if (!url) {
       return { error: 'URL is required' };
     }
-    const scraper = new ScraperService();
+    const user = req.user;
+    await this.scraper.initDriver();
     try {
       const html = await scraper.getRawHtml(url);
       const result = await parseHtmlWithGemini(html);
@@ -79,10 +85,12 @@ export class GameController {
     }
   }
   @Post('search')
-  async searchGames(@Body('query') query: string) {
+  @UseGuards(AuthGuard('jwt'))
+  async searchGames(@Body('query') query: string, @Request() req) {
     if (!query) {
       return { error: 'Query is required' };
     }
+    const user = req.user;
     try {
       const scraper = new ScraperService();
       const listUrls = await scraper.getProductLinks(query);
@@ -99,7 +107,7 @@ export class GameController {
           try {
             const html = await scraper.getRawHtml(url);
             const parsed = await parseHtmlWithGemini(html);
-            const game = await this.games.importFromJson(parsed);
+            const game = await this.games.importFromJson(parsed, user);
             return { url, status: 'success', game };
           } catch (err) {
             return { url, status: 'failed', error: err.message };

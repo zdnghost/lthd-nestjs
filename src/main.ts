@@ -37,6 +37,7 @@ async function bootstrap() {
   const partialsPath = join(viewPath, 'partials');
 
   app.setBaseViewsDir(viewPath);
+  app.useStaticAssets(viewPath);
   app.setViewEngine('hbs');
   hbs.registerPartials(partialsPath);
   app.set('view options', { layout: 'layouts/main' });

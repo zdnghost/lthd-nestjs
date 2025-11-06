@@ -1,49 +1,100 @@
 {{#> main title=title}}
-<div class="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-md mt-6">
-  <h1 class="text-3xl font-bold text-gray-800 mb-6">🎮 Danh sách Game</h1>
 
-  <form method="post" action="/games" class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-    <input name="name" placeholder="Tên game" required 
-           class="text-black border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
-    <input name="description" placeholder="Mô tả" 
-           class="text-black border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
-    <input name="platforms" placeholder="Platforms (cách nhau bằng dấu phẩy)" 
-           class="text-black border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
-    <button type="submit" 
-            class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded transition">Thêm Game</button>
-  </form>
+<div class="max-w-7xl mx-auto">
+  
+  <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mb-8">
+    <h2 class="text-2xl font-bold text-white mb-4">Import Game</h2>
+    <p class="text-gray-400 mb-4">Nhập tên game, hệ thống sẽ tự động tìm, cào dữ liệu và import vào danh sách.</p>
+    
+    <form id="search-form">
+      <div class="flex flex-col md:flex-row gap-4">
+        <input name="query" placeholder="Nhập tên game (ví dụ: Cyberpunk 2077)" required 
+               class="flex-grow bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+        
+        <button type="submit" id="search-button"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200
+                       disabled:bg-gray-500 disabled:cursor-not-allowed">
+          Tìm & Import
+        </button>
+      </div>
+    </form>
+    <div id="search-results" class="mt-4 text-sm"></div>
+  </div>
 
-  <div class="overflow-x-auto">
-    <table class="min-w-full bg-gray-50 rounded-lg overflow-hidden">
-      <thead class="bg-blue-500 text-white">
-        <tr>
-          <th class="px-4 py-2 text-left">Tên</th>
-          <th class="px-4 py-2 text-left">Mô tả</th>
-          <th class="px-4 py-2 text-left">Nền tảng</th>
-          <th class="px-4 py-2 text-left">Offers</th>
-          <th class="px-4 py-2 text-left">Hành động</th>
-        </tr>
-      </thead>
-      <tbody class="text-gray-700">
-        {{#each games}}
-        <tr class="border-b last:border-b-0 hover:bg-gray-100">
-          <td class="px-4 py-2"><a href="/games/{{this.id}}" class="text-blue-600 hover:underline">{{this.name}}</a></td>
-          <td class="px-4 py-2">{{this.description}}</td>
-          <td class="px-4 py-2">{{this.platforms}}</td>
-          <td class="px-4 py-2">{{this.offers.length}}</td>
-          <td class="px-4 py-2">
-            <form method="post" action="/games/{{this.id}}/delete" class="inline">
-              <button type="submit" 
-                      onclick="return confirm('Xóa game này?')"
-                      class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition">
-                Xóa
-              </button>
-            </form>
-          </td>
-        </tr>
-        {{/each}}
-      </tbody>
-    </table>
+  <h1 class="text-3xl font-bold text-white mb-6">🎮 Danh sách Game của bạn</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {{#each games}}
+      {{> gameCard game=this idx=@index}}
+      {{else}}
+      <p class="text-gray-400 col-span-3">Chưa có game nào trong danh sách. Hãy tìm kiếm game trước tiên theo nhu cầu của bạn nhé!</p>
+    {{/each}}
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchForm = document.getElementById('search-form');
+    const searchBtn = document.getElementById('search-button');
+    const resultDiv = document.getElementById('search-results');
+
+    if(searchForm){
+      searchForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        searchBtn.textContent = 'Đang tìm...';
+
+        const formData = new FormData(searchForm);
+        const query = formData.get('query');
+        if(!query) return;
+
+        searchBtn.disabled = true;
+        resultDiv.textContent = 'Đang tìm ...';
+        resultDiv.innerHTML = `
+          <p class="text-yellow-400">
+            🔍 Đang tìm game có tên "<strong>${query}</strong>"...
+            Vui lòng đọi 1 chútvà không tắt trình duyệt nhé! Quá trình này có thể kéo dài vài phút.
+            </p>`;
+
+        try{
+          // Gọi API
+          const response = await fetch('/games/search', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ query })
+          });
+          const data = await response.json();
+
+          if(!data || data.error){
+            resultDiv.innerHTML = `
+              <p class="text-red-400">❌ Không thành công: <strong>${data.detail || data.error}</strong></>p`;
+          } else {
+            resultDiv.innerHTML = `
+            <div class="bg-gray-700 p-4 rounded-lg">
+              <p class="text-green-400">✅ Đã tìm và import thành công vào danh sách!</p>
+              <p class="text-gray-400 mt-3">
+                <a href="/games" class="text-indigo-400 font-bold hover:underline">Bấm vào đây</a>
+                để xem danh sách cập nhật
+              </p>
+            </div>`;
+          }
+        } catch(error){
+          resultDiv.innerHTML = `
+            <p class="text-red-400">❌ Có lỗi xảy ra: ${error.message}!!!
+                      Không thể kết nối tới server</p>`;
+        } finally{
+          searchBtn.disabled = false;
+          searchBtn.textContent = 'Tìm & Import';
+        }
+      });
+    }
+  })
+  const cards = document.querySelectorAll('.game-card-item');
+  cards.forEach(card => {
+      card.classList.remove('opacity-0', 'translate-y-4');
+      card.classList.add('opacity-100', 'translate-y-0');
+  });
+</script>
+
 {{/main}}
