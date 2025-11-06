@@ -1,100 +1,113 @@
 {{#> main title=title}}
-
 <div class="max-w-7xl mx-auto">
-  
-  <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mb-8">
-    <h2 class="text-2xl font-bold text-white mb-4">Import Game</h2>
-    <p class="text-gray-400 mb-4">Nhập tên game, hệ thống sẽ tự động tìm, cào dữ liệu và import vào danh sách.</p>
+  <section class="mb-8">
+    <div class="bg-gray-800 p-8 rounded-2xl shadow-lg">
+      <h2 class="text-3xl font-bold text-white">Chào mừng trở lại, {{user.username}}!</h2>
+      <p class="text-gray-300 mt-2 text-lg">Đây là thư viện game cá nhân của bạn. Bấm "Thêm Game" để import game mới từ G2A.</p>
+    </div>
+  </section>
+
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-white">🎮 Danh sách Game của bạn</h1>
     
-    <form id="search-form">
-      <div class="flex flex-col md:flex-row gap-4">
-        <input name="query" placeholder="Nhập tên game (ví dụ: Cyberpunk 2077)" required 
-               class="flex-grow bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
-        
-        <button type="submit" id="search-button"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200
-                       disabled:bg-gray-500 disabled:cursor-not-allowed">
-          Tìm & Import
-        </button>
-      </div>
-    </form>
-    <div id="search-results" class="mt-4 text-sm"></div>
+    <button id="open-import-modal-btn"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2 rounded-lg transition-colors duration-200">
+      + Thêm Game
+    </button>
   </div>
 
-  <h1 class="text-3xl font-bold text-white mb-6">🎮 Danh sách Game của bạn</h1>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {{#each games}}
-      {{> gameCard game=this idx=@index}}
-      {{else}}
-      <p class="text-gray-400 col-span-3">Chưa có game nào trong danh sách. Hãy tìm kiếm game trước tiên theo nhu cầu của bạn nhé!</p>
-    {{/each}}
-  </div>
+   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {{#each games}}
+   {{> gameCard game=this idx=@index}}
+   {{else}}
+   <p class="text-gray-400 col-span-3">Chưa có game nào trong danh sách. Hãy bấm "Thêm Game" để bắt đầu import.</p>
+  {{/each}}
+ </div>
 </div>
-
+{{> importGameModal}}
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const searchForm = document.getElementById('search-form');
-    const searchBtn = document.getElementById('search-button');
-    const resultDiv = document.getElementById('search-results');
+ document.addEventListener('DOMContentLoaded', () => {
+    
+    // --- PHẦN LOGIC MODAL (MỚI) ---
+    const openBtn = document.getElementById('open-import-modal-btn');
+    const closeBtn = document.getElementById('close-import-modal-btn');
+    const modal = document.getElementById('import-modal');
+    const overlay = document.getElementById('import-modal-overlay');
 
-    if(searchForm){
-      searchForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        searchBtn.textContent = 'Đang tìm...';
+    const closeModal = () => {
+      modal.classList.add('hidden');
+      overlay.classList.add('hidden');
+    };
 
-        const formData = new FormData(searchForm);
-        const query = formData.get('query');
-        if(!query) return;
+    const openModal = () => {
+      modal.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+    };
 
-        searchBtn.disabled = true;
-        resultDiv.textContent = 'Đang tìm ...';
-        resultDiv.innerHTML = `
-          <p class="text-yellow-400">
-            🔍 Đang tìm game có tên "<strong>${query}</strong>"...
-            Vui lòng đọi 1 chútvà không tắt trình duyệt nhé! Quá trình này có thể kéo dài vài phút.
-            </p>`;
+    if (openBtn) openBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
 
-        try{
-          // Gọi API
-          const response = await fetch('/games/search', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ query })
-          });
-          const data = await response.json();
+    
+    // --- PHẦN LOGIC AJAX (Giữ nguyên từ code cũ) ---
+  const searchForm = document.getElementById('search-form');
+  const searchBtn = document.getElementById('search-button');
+  const resultDiv = document.getElementById('search-results');
 
-          if(!data || data.error){
-            resultDiv.innerHTML = `
-              <p class="text-red-400">❌ Không thành công: <strong>${data.detail || data.error}</strong></>p`;
-          } else {
-            resultDiv.innerHTML = `
-            <div class="bg-gray-700 p-4 rounded-lg">
-              <p class="text-green-400">✅ Đã tìm và import thành công vào danh sách!</p>
-              <p class="text-gray-400 mt-3">
-                <a href="/games" class="text-indigo-400 font-bold hover:underline">Bấm vào đây</a>
-                để xem danh sách cập nhật
-              </p>
-            </div>`;
-          }
-        } catch(error){
-          resultDiv.innerHTML = `
-            <p class="text-red-400">❌ Có lỗi xảy ra: ${error.message}!!!
-                      Không thể kết nối tới server</p>`;
-        } finally{
-          searchBtn.disabled = false;
-          searchBtn.textContent = 'Tìm & Import';
-        }
-      });
+  if(searchForm){
+   searchForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    searchBtn.textContent = 'Đang tìm...';
+
+    const formData = new FormData(searchForm);
+    const query = formData.get('query');
+    if(!query) return;
+
+    searchBtn.disabled = true;
+    resultDiv.innerHTML = `
+     <p class="text-yellow-400">
+      🔍 Đang tìm game có tên "<strong>${query}</strong>"...
+      Vui lòng đọi 1 chútvà không tắt trình duyệt nhé! Quá trình này có thể kéo dài vài phút.
+      </p>`;
+
+    try{
+     const response = await fetch('/games/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+     });
+     const data = await response.json();
+
+     if(!data || data.error){
+      resultDiv.innerHTML = `
+       <p class="text-red-400">❌ Không thành công: <strong>${data.detail || data.error}</strong></p>`; // Sửa lỗi thẻ </p>
+     } else {
+      resultDiv.innerHTML = `
+      <div class="bg-gray-700 p-4 rounded-lg">
+       <p class="text-green-400">✅ Đã tìm và import thành công vào danh sách!</p>
+       <p class="text-gray-400 mt-3">
+        <a href="/games" class="text-indigo-400 font-bold hover:underline">_Bấm vào đây_</a>
+        để xem danh sách cập nhật
+       </p>
+      </div>`;
+     }
+    } catch(error){
+     resultDiv.innerHTML = `
+      <p class="text-red-400">❌ Có lỗi xảy ra: ${error.message}!!!
+           Không thể kết nối tới server</p>`;
+    } finally{
+     searchBtn.disabled = false;
+     searchBtn.textContent = 'Tìm & Import';
     }
-  })
-  const cards = document.querySelectorAll('.game-card-item');
-  cards.forEach(card => {
-      card.classList.remove('opacity-0', 'translate-y-4');
-      card.classList.add('opacity-100', 'translate-y-0');
-  });
+   });
+  }
+
+    // --- PHẦN LOGIC ANIMATION (Giữ nguyên từ code cũ) ---
+ const cards = document.querySelectorAll('.game-card-item');
+ cards.forEach(card => {
+ card.classList.remove('opacity-0', 'translate-y-4');
+ card.classList.add('opacity-100', 'translate-y-0');
+ });
+ });
 </script>
 
 {{/main}}

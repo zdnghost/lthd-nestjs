@@ -54,7 +54,7 @@ export class AuthController {
       });
 
       // Redirect về trang chủ sau khi đăng ký thành công
-      return res.redirect('/');
+      return res.redirect('/games');
     } catch (error) {
       console.error('Registration error:', error);
       return res.render('register', {
@@ -79,7 +79,7 @@ export class AuthController {
       maxAge: 24 * 60 * 60 * 1000, // 1 ngày
     });
 
-    return res.redirect('/');
+    return res.redirect('/games');
   }
 
   @Post('logout')
