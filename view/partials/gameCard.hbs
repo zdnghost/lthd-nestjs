@@ -1,0 +1,47 @@
+{{!-- 
+  File này tên là gameCard.hbs
+--}}
+<div class="game-card-item opacity-0 transform translate-y-4 transition-all duration-500 ease-out">
+    
+    <div class="flex flex-col h-full bg-gray-800 rounded-xl shadow-xl overflow-hidden 
+               border border-gray-700/50 
+               transform transition-all duration-300 hover:scale-[1.03] hover:shadow-indigo-900/50 hover:border-indigo-600">
+
+        <div class="p-4 flex flex-col flex-grow">
+          
+            <div class="relative mb-2">
+                <span class="absolute top-0 right-0 px-3 py-1 text-xs font-bold 
+                            bg-indigo-600 text-white rounded-full shadow-md">
+                    {{#if game.offers}}
+                      {{game.offers.length}}
+                    {{else}}
+                      0
+                    {{/if}}
+                    Offers
+                </span>
+
+                <a href="/games/{{game.id}}" class="block">
+                  <h3 class="text-xl font-bold text-white truncate pr-16" title="{{game.name}}">
+                      {{game.name}}
+                  </h3>
+                </a>
+            </div>
+            
+            <div class="flex flex-wrap gap-2 mb-4">
+              {{#each game.platforms}}
+                <span class="text-xs font-medium bg-gray-700 text-gray-300 px-2 py-1 rounded-full">
+                  {{this}}
+                </span>
+              {{/each}}
+            </div>
+
+            <form method="post" action="/games/{{game.id}}/delete" class="mt-auto">
+                <button type="submit" onclick="return confirm('Bạn chắc chắn muốn xóa game này?')"
+                        class="w-full py-2 bg-gray-700 text-red-400 font-semibold rounded-lg 
+                              hover:bg-red-700 hover:text-white transition-colors duration-200">
+                    Xóa khỏi danh sách
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

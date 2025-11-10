@@ -1,4 +1,11 @@
-import { Controller, Get, Render, Request, Post, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Render,
+  Request,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AppService } from './app.service.js';
 import * as dotenv from 'dotenv';
 import { AuthGuard } from '@nestjs/passport';
@@ -7,8 +14,7 @@ dotenv.config();
 
 @Controller()
 export class AppController {
-
-  constructor(private readonly appService: AppService) { }
+  constructor(private readonly appService: AppService) {}
 
   @Get('gemini')
   async getGeminiResponse() {
@@ -22,18 +28,18 @@ export class AppController {
   @Get('login')
   @Render('login')
   getLogin() {
-    return { 
+    return {
       layout: 'layouts/auth',
-      title: 'Đăng nhập' 
+      title: 'Đăng nhập',
     };
   }
 
   @Get('register')
   @Render('register')
   showRegisterForm() {
-    return { 
-      layout: 'layouts/auth', 
-      title: 'Đăng ký' 
+    return {
+      layout: 'layouts/auth',
+      title: 'Đăng ký',
     };
   }
 

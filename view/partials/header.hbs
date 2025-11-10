@@ -1,13 +1,18 @@
-<header class="bg-gray-800 text-white p-4 shadow-md">
-  <nav class="max-w-7xl mx-auto flex flex-wrap items-center justify-center md:justify-start gap-4">
-    <a href="/" class="hover:text-gray-300 transition">🏠 Dashboard</a>
-    <span class="hidden md:inline">|</span>
-    <a href="/games" class="hover:text-gray-300 transition">🎮 Games</a>
-    <span class="hidden md:inline">|</span>
-    <a href="/offers" class="hover:text-gray-300 transition">💰 Offers</a>
-    <span class="hidden md:inline">|</span>
-    <form action="/auth/logout" method="POST">
-    <button type="submit">Đăng xuất</button>
-    </form>
+<header class="bg-gray-800 text-white shadow-lg sticky top-0 z-50">
+  <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
+    
+    <a href="/games" class="text-xl font-bold text-white hover:text-gray-300 transition-colors">
+      🚀 Tên Project
+    </a>
+    <div class="block">
+      <form action="/auth/logout" method="POST">
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors">
+          Đăng xuất
+        </button>
+      </form>
+    </div>
   </nav>
 </header>
+
+<script>
+</script>

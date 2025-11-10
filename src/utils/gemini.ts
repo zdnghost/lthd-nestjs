@@ -1,34 +1,34 @@
 import axios from 'axios';
 
 const GEMINI_API_URL =
-    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 export async function callGeminiApi(prompt: string) {
-    const apiKey = process.env.GOOGLE_STUDIO_API_KEY;
-    try {
-        const body = {
-            contents: [
-                {
-                    parts: [{ text: prompt }],
-                },
-            ],
-        };
+  const apiKey = process.env.GOOGLE_STUDIO_API_KEY;
+  try {
+    const body = {
+      contents: [
+        {
+          parts: [{ text: prompt }],
+        },
+      ],
+    };
 
-        const response = await axios.post(GEMINI_API_URL, body, {
-            headers: {
-                'Content-Type': 'application/json',
-                'X-goog-api-key': apiKey,
-            },
-        });
+    const response = await axios.post(GEMINI_API_URL, body, {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-goog-api-key': apiKey,
+      },
+    });
 
-        return response.data;
-    } catch (error: any) {
-        console.error('Gemini API error:', error.response?.data || error.message);
-        throw new Error('Failed to call Gemini API');
-    }
+    return response.data;
+  } catch (error: any) {
+    console.error('Gemini API error:', error.response?.data || error.message);
+    throw new Error('Failed to call Gemini API');
+  }
 }
 export async function parseHtmlWithGemini(html: string) {
-    const prompt = `
+  const prompt = `
 Bạn là bot phân tích HTML của website bán game. Dưới đây là HTML của một trang sản phẩm:
 """ 
 ${html}
@@ -56,15 +56,17 @@ Hãy trích xuất ra JSON theo mẫu:
 Chỉ trả JSON thuần, không giải thích thêm.
     `;
 
-    const raw = await callGeminiApi(prompt);
+  const raw = await callGeminiApi(prompt);
 
-    console.log(raw.candidates[0].content
-    );
-    const text = raw?.candidates?.[0]?.content?.parts?.[0]?.text.replace(/```json\n?/, '').replace(/```$/, '').trim();
+  console.log(raw.candidates[0].content);
+  const text = raw?.candidates?.[0]?.content?.parts?.[0]?.text
+    .replace(/```json\n?/, '')
+    .replace(/```$/, '')
+    .trim();
 
-    try {
-        return JSON.parse(text);
-    } catch {
-        throw new Error('Gemini trả về không đúng JSON');
-    }
-} 
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error('Gemini trả về không đúng JSON');
+  }
+}

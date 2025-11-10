@@ -22,10 +22,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     // payload là data đã được mã hoá khi sign token
     // return cái gì thì nó sẽ gán vào req.user
-    return { 
-      userId: payload.sub, 
+    return {
+      userId: payload.sub,
       username: payload.username,
-      id: payload.sub // Thêm id để dễ sử dụng
+      id: payload.sub, // Thêm id để dễ sử dụng
     };
   }
 }

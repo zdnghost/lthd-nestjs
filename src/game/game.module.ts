@@ -6,12 +6,11 @@ import { Game } from '../entities/Game.entity.js';
 import { Offer } from '../entities/Offer.entity.js';
 import { ScraperService } from '../utils/scraper.js';
 import { OfferHistory } from '../entities/OfferHistory.entity.js';
+import { User } from '../entities/User.entity.js';
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([Game, Offer,OfferHistory]),
-      ],
-    controllers: [GameController],
-    providers: [GamesService,ScraperService],
-    exports: [GamesService],
+  imports: [TypeOrmModule.forFeature([Game, User, Offer, OfferHistory])],
+  controllers: [GameController],
+  providers: [GamesService, ScraperService],
+  exports: [GamesService],
 })
-export class GameModule { }
+export class GameModule {}

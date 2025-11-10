@@ -1,22 +1,34 @@
-import { Controller, Get, Post, Param, Body, Redirect, Render, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  Redirect,
+  Render,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { GamesService } from './game.service.js';
 import { ScraperService } from '../utils/scraper.js';
 import { parseHtmlWithGemini } from '../utils/gemini.js';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('games')
 export class GameController {
   constructor(
     private readonly games: GamesService,
     private readonly scraper: ScraperService,
-  ) { }
-
-
+  ) {}
 
   @Get()
   @Render('games/index')
-  async list() {
-    const games = await this.games.findAll();
-    return { title: 'Game', games };
+  @UseGuards(AuthGuard('jwt'))
+  async list(@Request() req) {
+    const user = req.user;
+    const games = await this.games.findGamesByUser(user);
+    //const games = [];
+    return { title: 'Game', games, user };
   }
 
   @Post()
@@ -48,16 +60,18 @@ export class GameController {
     return { redirect: `/games/${id}` };
   }
   @Post('import')
-  async importGame(@Body('url') url: any) {
+  @UseGuards(AuthGuard('jwt'))
+  async importGame(@Body('url') url: any, @Request() req) {
     if (!url) {
       return { error: 'URL is required' };
     }
+    const user = req.user;
     const scraper = new ScraperService();
     try {
-      const html = await scraper.getRawHtml(url);;
+      const html = await scraper.getRawHtml(url);
       const result = await parseHtmlWithGemini(html);
-      console.log('Parsed result:', result);
-      const game = await this.games.importFromJson(result);
+
+      const game = await this.games.importFromJson(result, user);
 
       return {
         message: 'Import thành công',
@@ -71,12 +85,14 @@ export class GameController {
     }
   }
   @Post('search')
-  async searchGames(@Body('query') query: string) {
+  @UseGuards(AuthGuard('jwt'))
+  async searchGames(@Body('query') query: string, @Request() req) {
     if (!query) {
       return { error: 'Query is required' };
     }
+    const user = req.user;
+    const scraper = new ScraperService();
     try {
-      const scraper = new ScraperService();
       const listUrls = await scraper.getProductLinks(query);
       const maxConcurrent = 3;
       const results: {
@@ -84,14 +100,14 @@ export class GameController {
         status: string;
         game?: any;
         error?: string;
-      }[] = [];  
+      }[] = [];
       for (let i = 0; i < listUrls.length; i += maxConcurrent) {
         const chunk = listUrls.slice(i, i + maxConcurrent);
         const batch = chunk.map(async (url) => {
           try {
             const html = await scraper.getRawHtml(url);
             const parsed = await parseHtmlWithGemini(html);
-            const game = await this.games.importFromJson(parsed);
+            const game = await this.games.importFromJson(parsed, user);
             return { url, status: 'success', game };
           } catch (err) {
             return { url, status: 'failed', error: err.message };
@@ -100,12 +116,12 @@ export class GameController {
         const batchResults = await Promise.all(batch);
         results.push(...batchResults);
       }
-  
+
       return {
         message: 'Hoàn tất import hàng loạt',
         total: results.length,
-        success: results.filter(r => r.status === 'success').length,
-        failed: results.filter(r => r.status === 'failed').length,
+        success: results.filter((r) => r.status === 'success').length,
+        failed: results.filter((r) => r.status === 'failed').length,
         results,
       };
     } catch (err) {

@@ -1,11 +1,10 @@
 import { OfferHistory } from '../entities/OfferHistory.entity.js';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository, ILike } from 'typeorm';
 import { Game } from '../entities/Game.entity.js';
 import { Offer } from '../entities/Offer.entity.js';
-
-
+import { User } from '../entities/User.entity.js';
 
 @Injectable()
 export class GamesService {
@@ -16,6 +15,8 @@ export class GamesService {
     private readonly offerRepo: Repository<Offer>,
     @InjectRepository(OfferHistory)
     private readonly offerHistoryRepo: Repository<OfferHistory>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
   ) {}
 
   findAll() {
@@ -24,6 +25,21 @@ export class GamesService {
 
   findOne(id: string) {
     return this.gameRepo.findOne({ where: { id }, relations: ['offers'] });
+  }
+
+  async findGamesByUser(user: User) {
+    if (!user || !user.id) {
+      return [];
+    }
+    const userWithFavorites = await this.userRepo.findOne({
+      where: { id: user.id },
+      relations: ['favoriteGames', 'favoriteGames.offers'],
+    });
+
+    if (!userWithFavorites) {
+      return [];
+    }
+    return userWithFavorites.favoriteGames;
   }
 
   create(data: Partial<Game>) {
@@ -48,13 +64,12 @@ export class GamesService {
     });
     return this.offerRepo.save(offer);
   }
-  async importFromJson(data: any): Promise<Game> {
+  async importFromJson(data: any, user: User): Promise<Game> {
     const { name, description, platforms, type, offers } = data;
 
     // 🔹 Tìm hoặc tạo Game
     let existing = await this.gameRepo.findOne({
-      where: { name },
-      relations: ['offers'],
+      where: { name: ILike(name) },
     });
 
     if (!existing) {
@@ -80,7 +95,7 @@ export class GamesService {
         if (!sellerName || !shoppingPlatform) continue; // tránh lỗi dữ liệu thiếu
 
         // Tìm offer theo sellerName + shoppingPlatform + game
-        
+
         let offer = await this.offerRepo.findOne({
           where: {
             sellerName,
@@ -118,9 +133,36 @@ export class GamesService {
           console.log('Saved history:', history);
         }
       }
+    } else {
+      console.log(`Game "${name}" đã có trong CSDL. Chỉ gán user.`);
     }
-
+    await this.linkGameToUser(existing, user);
     return existing;
   }
-  
+  async linkGameToUser(game: Game, user: User): Promise<void> {
+    if (!user || !user.id || !game) {
+      return;
+    }
+    const userWithFavorites = await this.userRepo.findOne({
+      where: { id: user.id },
+      relations: ['favoriteGames'],
+    });
+    if (userWithFavorites) {
+      const isAlreadyFavorited = userWithFavorites.favoriteGames.some(
+        (favGame) => favGame.id === game.id,
+      );
+
+      if (!isAlreadyFavorited) {
+        userWithFavorites.favoriteGames.push(game);
+        await this.userRepo.save(userWithFavorites);
+        console.log(
+          `Đã liên kết game "${game.name}" với user "${user.username}".`,
+        );
+      } else {
+        console.log(
+          `User ${user.username} đã có game "${game.name}" trong danh sách yêu thích.`,
+        );
+      }
+    }
+  }
 }

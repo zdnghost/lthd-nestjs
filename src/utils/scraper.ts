@@ -4,7 +4,7 @@ import * as cheerio from 'cheerio';
 import * as dotenv from 'dotenv';
 export class ScraperService {
   private driver: any;
-  constructor() { }
+  constructor() {}
   private async initDriver(): Promise<void> {
     if (this.driver) return; // đã khởi tạo rồi thì không tạo lại
 
@@ -65,56 +65,111 @@ export class ScraperService {
       await this.driver.get(url);
       console.log(`Navigated to ${url}`);
       await this.driver.wait(async () => {
-        const readyState = await this.driver.executeScript('return document.readyState');
+        const readyState = await this.driver.executeScript(
+          'return document.readyState',
+        );
         return readyState === 'complete';
       }, 100000);
       console.log(`Page loaded: ${url}`);
       const html = await this.driver.getPageSource();
       const $ = cheerio.load(html);
       const tagsToRemove = [
-        'script', 'noscript', 'svg', 'iframe', 'head', 'style',
-        'source', 'footer', 'button', 'input', 'link',
-        'form', 'td', 'tr', 'table', 'meta', 'i', 'option', 'video', 'label',
-        'hr', 'br', 'select', 'title', 'textarea', 'aside', 'audio'
+        'script',
+        'noscript',
+        'svg',
+        'iframe',
+        'head',
+        'style',
+        'source',
+        'footer',
+        'button',
+        'input',
+        'link',
+        'form',
+        'td',
+        'tr',
+        'table',
+        'meta',
+        'i',
+        'option',
+        'video',
+        'label',
+        'hr',
+        'br',
+        'select',
+        'title',
+        'textarea',
+        'aside',
+        'audio',
       ];
-      tagsToRemove.forEach(tag => $(tag).remove());
+      tagsToRemove.forEach((tag) => $(tag).remove());
       const attrsToRemove = [
-        'class', 'id', 'style', 'width', 'height', 'rel', 'target', 'href', 'title', 'role', 'lang',
-        'prefix', 'as', 'crossorigin', 'cellspacing', 'summary', 'cel_widget_id', 'content',
-        'disablepictureinpicture', 'playsinline', 'preload', 'poster', 'dir', 'tabindex', 'alt',
-        'loading', 'fetchpriority', 'decoding', 'sizes', 'scrolling', 'frameborder',
-        'value', 'lazy-load-status', 'name'
+        'class',
+        'id',
+        'style',
+        'width',
+        'height',
+        'rel',
+        'target',
+        'href',
+        'title',
+        'role',
+        'lang',
+        'prefix',
+        'as',
+        'crossorigin',
+        'cellspacing',
+        'summary',
+        'cel_widget_id',
+        'content',
+        'disablepictureinpicture',
+        'playsinline',
+        'preload',
+        'poster',
+        'dir',
+        'tabindex',
+        'alt',
+        'loading',
+        'fetchpriority',
+        'decoding',
+        'sizes',
+        'scrolling',
+        'frameborder',
+        'value',
+        'lazy-load-status',
+        'name',
       ];
       $('*').each((_, el) => {
-        attrsToRemove.forEach(attr => $(el).removeAttr(attr));
+        attrsToRemove.forEach((attr) => $(el).removeAttr(attr));
       });
       return $.html();
     } catch (error) {
       throw new Error('Failed to scrape page');
-    }
-    finally {
+    } finally {
       await this.closeDriver();
     }
-  }    
+  }
   async getProductLinks(query: string): Promise<string[]> {
     await this.initDriver();
     try {
       const url = `https://www.g2a.com/search?query=${encodeURIComponent(query)}`;
       await this.driver.get(url);
       await this.driver.wait(async () => {
-        const readyState = await this.driver.executeScript('return document.readyState');
+        const readyState = await this.driver.executeScript(
+          'return document.readyState',
+        );
         return readyState === 'complete';
       }, 100000);
       const html = await this.driver.getPageSource();
       const $ = cheerio.load(html);
       const links: (string | null)[] = [];
       $('.inVBLd').each((_, el) => {
-        const aTag = $(el).find('a').first(); 
+        const aTag = $(el).find('a').first();
         const href = aTag.attr('href');
         if (href) {
           const fullUrl = href.startsWith('http')
-            ? href.replace(/^http:/, 'https:') 
-            : `https://www.g2a.com${href}`;   
+            ? href.replace(/^http:/, 'https:')
+            : `https://www.g2a.com${href}`;
           links.push(fullUrl);
         }
       });
@@ -122,9 +177,8 @@ export class ScraperService {
       return cleanLinks.slice(0, 3);
     } catch (error) {
       throw new Error('Failed to scrape page');
-    }
-    finally {
+    } finally {
       await this.closeDriver();
     }
-  }    
+  }
 }
