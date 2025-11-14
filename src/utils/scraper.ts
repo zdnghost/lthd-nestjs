@@ -4,7 +4,7 @@ import * as cheerio from 'cheerio';
 import * as dotenv from 'dotenv';
 export class ScraperService {
   private driver: any;
-  constructor() {}
+  constructor() { }
   private async initDriver(): Promise<void> {
     if (this.driver) return; // đã khởi tạo rồi thì không tạo lại
 

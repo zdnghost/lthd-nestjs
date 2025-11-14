@@ -130,7 +130,6 @@ export class GamesService {
             recordedAt: new Date(),
           });
           await this.offerHistoryRepo.save(history);
-          console.log('Saved history:', history);
         }
       }
     } else {
