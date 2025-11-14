@@ -1,0 +1,7 @@
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {{#each games}}
+    {{> gameCard game=this idx=@index}}
+  {{else}}
+    <p class="text-gray-400 col-span-3">Chưa có game nào trong danh sách. Hãy bấm "Thêm Game" để bắt đầu import.</p>
+  {{/each}}
+</div>

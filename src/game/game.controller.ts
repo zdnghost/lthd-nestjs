@@ -8,6 +8,8 @@ import {
   Render,
   UseGuards,
   Request,
+  Res,
+  HttpStatus,
 } from '@nestjs/common';
 import { GamesService } from './game.service.js';
 import { ScraperService } from '../utils/scraper.js';
@@ -39,6 +41,34 @@ export class GameController {
       description: body.description,
       platforms: body.platforms.split(',').map((p) => p.trim()),
     });
+  }
+
+  @Get('list-partial')
+  @UseGuards(AuthGuard('jwt'))
+  async getGameListPartial(@Request() req, @Res() res) {
+    const user = req.user;
+    const games = await this.games.findGamesByUser(user);
+
+    res.render(
+      'games/gameListContent',
+      {
+        games,
+        layout: false,
+        partials: {
+          gameList: 'partials/gameListContent',
+          gameCard: 'partials/gameCard',
+        },
+      },
+      (error, html) => {
+        if (error) {
+          console.log(error);
+          return res
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .send('Lỗi render list!!!');
+        }
+        res.send(html);
+      },
+    );
   }
 
   @Get(':id')
