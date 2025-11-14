@@ -16,16 +16,41 @@
     </button>
   </div>
 
-   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {{#each games}}
-   {{> gameCard game=this idx=@index}}
-   {{else}}
-   <p class="text-gray-400 col-span-3">Chưa có game nào trong danh sách. Hãy bấm "Thêm Game" để bắt đầu import.</p>
-  {{/each}}
- </div>
+  <div id="game-list-container">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {{#each games}}
+      {{> gameCard game=this idx=@index}}
+    {{else}}
+      <p class="text-gray-400 col-span-3">Chưa có game nào trong danh sách. Hãy bấm "Thêm Game" để bắt đầu import.</p>
+    {{/each}}
+    </div>
+  </div>
 </div>
 {{> importGameModal}}
 <script>
+ async function refreshGameList(){
+   const gameListContainer = document.getElementById('game-list-container');
+   if(!gameListContainer) return;
+   try{
+     const response = await fetch('/games/list-partial', {
+        method: 'GET',
+        headers: { 'Content-Type': 'text/html' }
+     });
+     if(response.ok){
+      const html = await response.text();
+      gameListContainer.innerHTML = html;
+
+      const cards = gameListContainer.querySelectorAll('.game-card-item');
+      cards.forEach(card => {
+        card.classList.remove('opacity-0', 'translate-y-4');
+        card.classList.add('opacity-100', 'translate-y-0');
+      });
+     }
+   } catch(error){
+     console.error('Lỗi khi làm mới danh sách game:', error);
+   }
+ } 
+ 
  document.addEventListener('DOMContentLoaded', () => {
     
     // --- PHẦN LOGIC MODAL (MỚI) ---
@@ -48,7 +73,6 @@
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
 
     
-    // --- PHẦN LOGIC AJAX (Giữ nguyên từ code cũ) ---
   const searchForm = document.getElementById('search-form');
   const searchBtn = document.getElementById('search-button');
   const resultDiv = document.getElementById('search-results');
@@ -82,14 +106,14 @@
        <p class="text-red-400">❌ Không thành công: <strong>${data.detail || data.error}</strong></p>`; // Sửa lỗi thẻ </p>
      } else {
       resultDiv.innerHTML = `
-      <div class="bg-gray-700 p-4 rounded-lg">
-       <p class="text-green-400">✅ Đã tìm và import thành công vào danh sách!</p>
-       <p class="text-gray-400 mt-3">
-        <a href="/games" class="text-indigo-400 font-bold hover:underline">_Bấm vào đây_</a>
-        để xem danh sách cập nhật
-       </p>
-      </div>`;
+       <p class="text-green-400">✅ Đã tìm và import thành công vào danh sách!</p>`;
      }
+      await refreshGameList();
+
+      setTimeout(() => {
+       resultDiv.innerHTML = '';
+       closeModal();
+      }, 3000);
     } catch(error){
      resultDiv.innerHTML = `
       <p class="text-red-400">❌ Có lỗi xảy ra: ${error.message}!!!
@@ -100,8 +124,7 @@
     }
    });
   }
-
-    // --- PHẦN LOGIC ANIMATION (Giữ nguyên từ code cũ) ---
+  
  const cards = document.querySelectorAll('.game-card-item');
  cards.forEach(card => {
  card.classList.remove('opacity-0', 'translate-y-4');
