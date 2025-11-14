@@ -57,8 +57,6 @@ Chỉ trả JSON thuần, không giải thích thêm.
     `;
 
   const raw = await callGeminiApi(prompt);
-
-  console.log(raw.candidates[0].content);
   const text = raw?.candidates?.[0]?.content?.parts?.[0]?.text
     .replace(/```json\n?/, '')
     .replace(/```$/, '')
